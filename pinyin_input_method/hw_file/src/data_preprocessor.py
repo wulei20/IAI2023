@@ -165,43 +165,58 @@ class DataPreprocessor():
         if not os.path.exists(SINA_NEWS_CORPUS_OUTPUT_DIR):
             os.makedirs(SINA_NEWS_CORPUS_OUTPUT_DIR)
 
-    def substitute_last_comma(self):
-        corpus_files = self.get_corpus_files(SINA_NEWS_CORPUS_OUTPUT_DIR)
-        for file_name in corpus_files:
-            print(f"Processing {file_name}")
-            with open(file_name, 'r', encoding='utf-8') as f:
-                str = f.read()
-                print(len(str))
-                for i in range(len(str) - 1, -1, -1):
-                    if str[i] == ',':
-                        str = str[:i] + ' ' + str[i + 1:]
-                        break
-            with open(file_name, 'w', encoding='utf-8') as f:
-                f.write(str)
+    # the following functions are used to fix a bug in the preprocessing process
+    # at first I forgot to remove the last comma after the last sentence in each json file
+    # which means the last sentence in each json file still need a value after the comma
+    # or the json file will be invalid to be loaded
+    # so I wrote these functions to fix it
+    # however, I found that the first method is not working
+    # since using the file pointer to read each character and find the last comma takes too much time
+    # so I wrote the second method to fix it
+    # which is to read the whole file into a string and then find the last comma by iterating the string from the end
+    # then save it back to the file
+    # I thought the second method would be slower than the first one
+    # since the first method only need to read the file once
+    # while the second method need to read the file and rewrite the file
+    # but it turns out that the second method is much faster than the first one
+    # really weird
+    # maybe related to the file system
 
-    def reset_comma(self):
-        corpus_files = self.get_corpus_files(SINA_NEWS_CORPUS_OUTPUT_DIR)
-        for file_name in corpus_files:
-            with open(file_name, 'r+', encoding='utf-8') as f:
-                cnt = 0
-                while True:
-                    char = f.read(1)
-                    if not char:
-                        break
-                    if char == '"':
-                        cnt += 1
-                        if cnt == 2:
-                            last_comma_pos = f.tell()
-                            break
-                f.seek(last_comma_pos)
-                f.write(',')
+    # def substitute_last_comma(self):
+    #     corpus_files = self.get_corpus_files(SINA_NEWS_CORPUS_OUTPUT_DIR)
+    #     for file_name in corpus_files:
+    #         print(f"Processing {file_name}")
+    #         with open(file_name, 'r', encoding='utf-8') as f:
+    #             str = f.read()
+    #             print(len(str))
+    #             for i in range(len(str) - 1, -1, -1):
+    #                 if str[i] == ',':
+    #                     str = str[:i] + ' ' + str[i + 1:]
+    #                     break
+    #         with open(file_name, 'w', encoding='utf-8') as f:
+    #             f.write(str)
+
+    # def reset_comma(self):
+    #     corpus_files = self.get_corpus_files(SINA_NEWS_CORPUS_OUTPUT_DIR)
+    #     for file_name in corpus_files:
+    #         with open(file_name, 'r+', encoding='utf-8') as f:
+    #             cnt = 0
+    #             while True:
+    #                 char = f.read(1)
+    #                 if not char:
+    #                     break
+    #                 if char == '"':
+    #                     cnt += 1
+    #                     if cnt == 2:
+    #                         last_comma_pos = f.tell()
+    #                         break
+    #             f.seek(last_comma_pos)
+    #             f.write(',')
 
 if __name__ == '__main__':
     data_preprocessor = DataPreprocessor()
-    # # data_preprocessor.reconstitute_character_spell_data()
-    # # data_preprocessor.strip_sina_news_corpus()
+    data_preprocessor.reconstitute_character_spell_data()
+    data_preprocessor.strip_sina_news_corpus()
     data_preprocessor.count_unit_and_tuple_occurance()
     data_preprocessor.count_triple_occurance()
-    # data_preprocessor.substitute_last_comma()
-    # data_preprocessor.reset_comma()
     

@@ -6,14 +6,18 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', '-m', default = '2', help = 'The element num of model.', choices = ['2', '3'])
     parser.add_argument('--input', '-i', default = 'data/input.txt', help = 'Input file.')
-    parser.add_argument('--output', '-o', default = 'data/test.txt', help = 'Output file.')
+    parser.add_argument('--output', '-o', default = 'data/output.txt', help = 'Output file.')
     parser.add_argument('--notcheck', '-n', default = False, type = bool)
-    parser.add_argument('--std_output', '-a', default = 'data/std_output.txt', help = 'Standard output file.')
+    parser.add_argument('--std_output', '-s', default = 'data/std_output.txt', help = 'Standard output file.')
+    parser.add_argument('--alpha', '-a', default = 0.999, type = float, help = 'The weight of tuple occurance.')
+    parser.add_argument('--beta', '-b', default = 0.999, type = float, help = 'The weight of triple occurance.')
     args = parser.parse_args()
     if args.model == '2':
-        model = BinaryModel()
+        print(f"Binary model, alpha = {args.alpha}")
+        model = BinaryModel(args.alpha)
     elif args.model == '3':
-        model = TrigramModel()
+        print(f"Trigram model, alpha = {args.alpha}, beta = {args.beta}")
+        model = TrigramModel(args.alpha, args.beta)
     else:
         raise Exception('Wrong model.')
     input_path = args.input
